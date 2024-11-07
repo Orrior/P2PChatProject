@@ -59,23 +59,18 @@ public class Client {
             System.out.println("INVITE SERVER LISTENING ON PORT " + inviteAddress.toString());
 
             // Start Connection with Arbiter Server, initialise fields.
-            runArbiterSocket(hostname,port, inviteAddress);
+            initArbiterSocket(hostname,port, inviteAddress);
             System.out.println("Connection Established!");
 
-        } catch (UnknownHostException ex) {
+            ClientConnectionListener connectionListener = new ClientConnectionListener(inviteServerSocket);
+            connectionListener.start();
 
-            System.out.println("Server not found: " + ex.getMessage());
-
-        } catch (IOException ex) {
-
-            System.out.println("I/O error: " + ex.getMessage());
         } catch (Exception ex) {
-
-            System.out.println("THIS IS SOME REAL UNEXPECTED ERROR: " + ex.getMessage());
+            System.out.println("ERROR: " + ex.getMessage());
         }
     }
 
-    private void runArbiterSocket(String hostname, int port, SocketAddress inviteAddress) throws IOException, ClassNotFoundException {
+    private void initArbiterSocket(String hostname, int port, SocketAddress inviteAddress) throws IOException, ClassNotFoundException {
         this.arbiterSocket = new Socket(hostname, port);
 
         //OUT-COMING MESSAGE
@@ -114,12 +109,24 @@ public class Client {
         output.println(username);
 
         try{
-
             result = (List<DataSocket>) input.readObject();
             result.removeIf(x -> x.socketAddress.equals(inviteServerSocket.getLocalSocketAddress())); //TODO! Ideally ping data should be in hashmap.
             return result;
 
         } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void connectListener(SocketAddress socketAddress){
+
+        try (Socket listenerSocket = new Socket()) {
+            listenerSocket.connect(socketAddress);
+            PrintWriter writer = new PrintWriter(listenerSocket.getOutputStream(), true);
+            writer.println("TEST123");
+            System.out.println("SIRE WE HAVETH CONQUERED THOU CONNECTIONEAUX!");
+
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

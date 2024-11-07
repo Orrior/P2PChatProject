@@ -8,6 +8,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.List;
 
 public class HelloController {
@@ -25,6 +28,12 @@ public class HelloController {
         usersList.setContent(createConnectionGrid(connections));
     }
 
+    @FXML
+    protected void tryConnectButtonClick(SocketAddress socketAddress){
+
+        client.connectListener(socketAddress);
+    }
+
     private GridPane createConnectionGrid(List<DataSocket> connections) {
 
         //TODO!!! Exclude own connection from list.
@@ -34,6 +43,8 @@ public class HelloController {
         for(int i=0; i<connections.size(); i++){
             Button button = new Button();
             button.setText("Connect");
+            int index = i;
+            button.setOnAction(actionEvent -> tryConnectButtonClick(connections.get(index).socketAddress));
 
             Label label = new Label();
             label.setText(connections.get(i).toString());
