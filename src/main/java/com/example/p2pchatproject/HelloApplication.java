@@ -27,6 +27,12 @@ public class HelloApplication extends Application {
         stage.show();
     }
 
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        client.connectionListener.close();
+    }
+
     public static void main(String[] args) {
         launch();
     }
