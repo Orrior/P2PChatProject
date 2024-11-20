@@ -1,7 +1,8 @@
 package com.example.p2pchatproject.serverclient.Client;
 
 
-import com.example.p2pchatproject.model.DataSocket;
+import com.example.p2pchatproject.model.ClientData;
+import com.example.p2pchatproject.model.ServerData;
 
 import java.io.*;
 import java.net.*;
@@ -33,13 +34,13 @@ public class Client {
             result = scanner.nextLine();
             output.println(result);
 
-            List<DataSocket> dataPool = null;
+            List<ServerData> dataPool = null;
             try {
-                dataPool = (List<DataSocket>) input.readObject();
+                dataPool = (List<ServerData>) input.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            for (DataSocket dataSocket : dataPool) {
+            for (ServerData dataSocket : dataPool) {
                 System.out.println("DATA: " + dataSocket.socketAddress + " " + dataSocket.data);
             }
         }
@@ -52,7 +53,7 @@ public class Client {
         int port = 6868;
 
         try {
-            // Listening to chat P2P connection invitations
+            // Create socket listening to chat P2P connection invitations
             inviteServerSocket = new ServerSocket(0); // port 0 will try to listen and take any free port.
             SocketAddress inviteAddress = inviteServerSocket.getLocalSocketAddress(); // TODO! Maybe we should bind ServerSocket ip to localhost later.
             System.out.println("INVITE SERVER LISTENING ON PORT " + inviteAddress.toString());
@@ -61,6 +62,7 @@ public class Client {
             initArbiterSocket(hostname, port, inviteAddress);
             System.out.println("Connection Established!");
 
+            // Create chat P2P connection invitations listener
             connectionListener = new ClientConnectionListener(inviteServerSocket);
             connectionListener.start();
 
@@ -85,32 +87,32 @@ public class Client {
         this.input = inputObject;
 
         //First connection data;
-        outputObject.writeObject(new DataSocket(inviteAddress, username));
-        for (DataSocket dataSocket : (List<DataSocket>) this.input.readObject()) {
+        outputObject.writeObject(new ServerData(inviteAddress, username));
+        for (ServerData dataSocket : (List<ServerData>) this.input.readObject()) {
             System.out.println(dataSocket); // TODO this is actually not very good.
         }
     }
 
-    public List<DataSocket> getAllUsers() {
-        //TODO IDK we'll save it for dev purposes for now;
-        output.println("Client-1");
+    private List<ClientData> getClientData() throws IOException, ClassNotFoundException {
+        List<ServerData> serverData;
+        List<ClientData> clientData = new ArrayList<>();
 
-        try {
-            return (List<DataSocket>) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+        serverData = (List<ServerData>) input.readObject();
+
+
+        serverData.forEach(x -> clientData.add(new ClientData(x,
+                connectionListener.pendingSockets.containsKey(x.socketAddress))));
+        return clientData;
     }
 
-    public List<DataSocket> ping() {
-        List<DataSocket> result;
-
-        output.println(username);
+    public List<ClientData> ping() {
+        List<ClientData> clientData;
+        output.println(username);  // Send something to server to get users list.
 
         try {
-            result = (List<DataSocket>) input.readObject();
-            result.removeIf(x -> x.socketAddress.equals(inviteServerSocket.getLocalSocketAddress())); //TODO! Ideally ping data should be in hashmap.
-            return result;
+            clientData = getClientData();
+            clientData.removeIf(x -> x.socketAddress.equals(inviteServerSocket.getLocalSocketAddress())); //TODO! Ideally ping data should be in hashmap.
+            return clientData;
 
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -118,12 +120,12 @@ public class Client {
     }
 
     public void connectListener(SocketAddress socketAddress) {
-
+        // DEBUG DEPRECATED
         try (Socket listenerSocket = new Socket()) {
             listenerSocket.connect(socketAddress);
             PrintWriter writer = new PrintWriter(listenerSocket.getOutputStream(), true);
             writer.println("TEST123");
-            System.out.println("SIRE WE HAVETH CONQUERED THOU CONNECTIONEAUX!");
+            System.out.println("Connection Confirmed!");
 
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -1,7 +1,7 @@
 package com.example.p2pchatproject.serverclient.Arbiter;
 
 
-import com.example.p2pchatproject.model.DataSocket;
+import com.example.p2pchatproject.model.ServerData;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class ArbiterThread extends Thread{;
-    private Hashtable<SocketAddress, DataSocket> addressPool;
+    private Hashtable<SocketAddress, ServerData> addressPool;
     private Socket socket;
     private SocketAddress address;
 
-    public ArbiterThread(Socket socket, Hashtable<SocketAddress, DataSocket> addressPool) {
+    public ArbiterThread(Socket socket, Hashtable<SocketAddress, ServerData> addressPool) {
         this.address = socket.getRemoteSocketAddress();
         this.socket = socket;
         this.addressPool = addressPool;
@@ -31,10 +31,10 @@ public class ArbiterThread extends Thread{;
             OutputStream output = socket.getOutputStream();
             ObjectOutputStream objectOutput = new ObjectOutputStream(output);
 
-            DataSocket data = (DataSocket) inputObject.readObject();
+            ServerData data = (ServerData) inputObject.readObject();
             addressPool.put(socket.getRemoteSocketAddress(), data);
 
-            for (DataSocket dataSocket : addressPool.values()) {
+            for (ServerData dataSocket : addressPool.values()) {
                 System.out.println("DATA: " + dataSocket.socketAddress + " " + dataSocket.data);
             }
 

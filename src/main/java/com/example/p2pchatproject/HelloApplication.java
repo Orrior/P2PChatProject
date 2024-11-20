@@ -21,6 +21,8 @@ public class HelloApplication extends Application {
         scene.getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
         HelloController controller = fxmlLoader.getController();
         controller.setClient(client);
+        // Add listener.
+        client.connectionListener.addPendingConnectionListener(controller::onHelloButtonClick);
 
         stage.setTitle("P2PChat");
         stage.setScene(scene);

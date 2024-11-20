@@ -1,10 +1,12 @@
 package com.example.p2pchatproject.serverclient.Client;
 
+import javafx.application.Platform;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -13,10 +15,13 @@ public class ClientConnectionListener extends Thread {
     ServerSocket listenerServerSocket;
     List<ClientChatThread> chats;
     Hashtable<SocketAddress, Socket> pendingSockets;
-
+    List<PendingConnectionListener> pendingConnectionListeners;
 
     public ClientConnectionListener(ServerSocket serverSocket){
         this.listenerServerSocket = serverSocket;
+        this.pendingSockets = new Hashtable<>();
+        this.pendingConnectionListeners = new ArrayList<>();
+        this.chats = new ArrayList<>();
     }
 
     public void close() throws IOException {
@@ -27,43 +32,81 @@ public class ClientConnectionListener extends Thread {
         System.out.println("The ConnectionListener is listening on port " + listenerServerSocket.getLocalPort());
         try {
             while (true) {
-
-                Socket socket = listenerServerSocket.accept();
-                SocketAddress address = socket.getRemoteSocketAddress();
-                pendingSockets.put(address, socket);
-
-                System.out.println("New chat request");
+                acceptInviteSocket();
 
                 boolean acceptChatOrNot = true; // Todo Handle this bozo
+//                resolveInvite(address, acceptChatOrNot);
+                System.out.println("New chat request");
 
-                resolveChat(address, acceptChatOrNot);
+                // Todo need to make it that invites besides first from the same socket address are ignored.
+                //  ( we need only first one anyway )
             }
         } catch (Exception e) {
             System.out.println("CONNECTIONLISTENER ERROR: " + e.getMessage());
         }
     }
 
-    public void resolveChat(SocketAddress address, boolean accept) throws IOException {
+    public void acceptInviteSocket() throws IOException, ClassNotFoundException {
+        // Accept socket and add it in pendingSockets.
+        Socket socket = listenerServerSocket.accept();
+
+        ObjectInputStream inputObject = new ObjectInputStream(socket.getInputStream());
+        SocketAddress address = (SocketAddress) inputObject.readObject();
+
+        updatePendingConnections(address,socket);
+    }
+
+    public void updatePendingConnections(SocketAddress address, Socket socket) {
+        pendingSockets.put(address, socket);
+        Platform.runLater(() -> pendingConnectionListeners.forEach(PendingConnectionListener::onConnection));
+    }
+
+    public void acceptPendingConnection(SocketAddress address){
         Socket socket = pendingSockets.get(address);
-        if(accept){
-            new PrintWriter(socket.getOutputStream()).print("hiii <3<3<3 meowdy everybunny");
-            chats.add(new ClientChatThread(socket));
-        } else {
-            socket.close();
+        try {
+            chats.add(new ClientChatThread(socket)); //TODO handle this!
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            pendingSockets.remove(address);
         }
-        pendingSockets.remove(address);
+    }
+
+    public void rejectPendingConnection(SocketAddress address){
+        Socket socket = pendingSockets.get(address);
+        try {
+            socket.close();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            pendingSockets.remove(address);
+        }
     }
 
     public void requestChatConnect(SocketAddress socketAddress) {
         try {
-            Socket listenerSocket = new Socket();
-            listenerSocket.connect(socketAddress);
-            new PrintWriter(listenerSocket.getOutputStream()).print("hallo"); //TODO make hallo message nickname;
-            new BufferedReader(new InputStreamReader(listenerSocket.getInputStream())).read();
-            chats.add(new ClientChatThread(listenerSocket));
+            Socket socket = new Socket();
+            socket.connect(socketAddress);
 
+            OutputStream output = socket.getOutputStream();
+            ObjectOutputStream objectOutput = new ObjectOutputStream(output);
+
+            // Send listener socket address as identifier.
+            objectOutput.writeObject(listenerServerSocket.getLocalSocketAddress());
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+            chats.add(new ClientChatThread(socket));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void addPendingConnectionListener(PendingConnectionListener listener) {
+        pendingConnectionListeners.add(listener);
+    }
+
+    public int getPendingConnections() {
+        return pendingSockets.size();
     }
 }
