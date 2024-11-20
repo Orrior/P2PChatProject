@@ -53,6 +53,13 @@ public class HelloController {
             SocketAddress socketAddress = connections.get(i).socketAddress;
             button1.setOnAction(x -> tryConnectButtonClick(socketAddress));
 
+            Label label = new Label();
+            label.setText(connections.get(i).toString());
+
+            //add connection button to GridPane
+            grid.add(button1, 0, i); //  (child, columnIndex, rowIndex)
+            grid.add(label , 3, i);
+
             if(connections.get(i).pendingConnection){
                 Button button2 = new Button();
                 button2.setText("Accept");
@@ -61,23 +68,10 @@ public class HelloController {
                 Button button3 = new Button();
                 button3.setText("Reject");
                 button3.setOnAction(x -> rejectPendingConnection(socketAddress));
-            }
-            Button button2 = new Button();
-            String text;
-            if(connections.get(i).pendingConnection){
-                text = "invitenokonoko";
-            } else {
-                text = "shikanoko";
-            }
-            button2.setText(text);
 
-            Label label = new Label();
-            label.setText(connections.get(i).toString());
-
-            //add them to the GridPane
-            grid.add(button1, 0, i); //  (child, columnIndex, rowIndex)
-            grid.add(label , 1, i);
-            grid.add(button2, 2, i); // FIXME
+                grid.add(button2, 1, i); // FIXME
+                grid.add(button3, 2, i); // FIXME
+            }
 
             // margins are up to your preference
             GridPane.setMargin(button1, new Insets(5));

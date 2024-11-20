@@ -17,7 +17,7 @@ public class HelloApplication extends Application {
         client.run();
 
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 600, 400);
+        Scene scene = new Scene(fxmlLoader.load(), 1000, 400);
         scene.getStylesheets().add(getClass().getResource("Style.css").toExternalForm());
         HelloController controller = fxmlLoader.getController();
         controller.setClient(client);

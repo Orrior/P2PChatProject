@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.Hashtable;
 
-public class ArbiterServer {
+public class Server {
     public static void main(String[] args) {
         int port = 6868;
         try (ServerSocket serverSocket = new ServerSocket(port)) {
@@ -19,7 +19,7 @@ public class ArbiterServer {
                 Socket socket = serverSocket.accept();
                 System.out.println("New client connected");
 
-                new ArbiterThread(socket, addressPool).start();
+                new ServerThread(socket, addressPool).start();
             }
 
         } catch (IOException e) {

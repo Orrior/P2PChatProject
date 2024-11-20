@@ -52,12 +52,12 @@ public class ClientConnectionListener extends Thread {
 
         ObjectInputStream inputObject = new ObjectInputStream(socket.getInputStream());
         SocketAddress address = (SocketAddress) inputObject.readObject();
-
-        updatePendingConnections(address,socket);
+        pendingSockets.put(address, socket);
+        updatePendingConnections();
     }
 
-    public void updatePendingConnections(SocketAddress address, Socket socket) {
-        pendingSockets.put(address, socket);
+    public void updatePendingConnections() {
+        // Notify GUI about connections update.
         Platform.runLater(() -> pendingConnectionListeners.forEach(PendingConnectionListener::onConnection));
     }
 
@@ -69,6 +69,9 @@ public class ClientConnectionListener extends Thread {
             System.out.println(e.getMessage());
         } finally {
             pendingSockets.remove(address);
+            updatePendingConnections();
+            //DEBUG
+            System.out.println("Chat Request Accepted");
         }
     }
 
@@ -80,6 +83,9 @@ public class ClientConnectionListener extends Thread {
             System.out.println(e.getMessage());
         } finally {
             pendingSockets.remove(address);
+            updatePendingConnections();
+            //DEBUG
+            System.out.println("Chat Request Rejected");
         }
     }
 

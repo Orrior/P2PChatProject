@@ -9,12 +9,12 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-public class ArbiterThread extends Thread{;
+public class ServerThread extends Thread{;
     private Hashtable<SocketAddress, ServerData> addressPool;
     private Socket socket;
     private SocketAddress address;
 
-    public ArbiterThread(Socket socket, Hashtable<SocketAddress, ServerData> addressPool) {
+    public ServerThread(Socket socket, Hashtable<SocketAddress, ServerData> addressPool) {
         this.address = socket.getRemoteSocketAddress();
         this.socket = socket;
         this.addressPool = addressPool;
