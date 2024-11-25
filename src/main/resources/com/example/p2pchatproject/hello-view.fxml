@@ -7,8 +7,8 @@
 
 <HBox alignment="TOP_LEFT" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.p2pchatproject.HelloController">
 <!--  <VBox minWidth="200" prefWidth="230" styleClass="onlineTab">-->
-  <VBox minWidth="600" prefWidth="630" styleClass="onlineTab">
-      <Label fx:id="test123" text="123"></Label>
+<!--  <VBox minWidth="500" prefWidth="530" styleClass="onlineTab">-->
+  <VBox minWidth="200" prefWidth="530" styleClass="onlineTab">
     <padding>
       <Insets bottom="10.0" left="10.0" right="10.0" top="20.0" />
     </padding>

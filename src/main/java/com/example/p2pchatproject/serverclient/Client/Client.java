@@ -9,7 +9,7 @@ import java.net.*;
 import java.util.*;
 
 public class Client {
-    public ClientConnectionListener connectionListener;
+    public ClientConnectionListenerThread connectionListener;
 
     private PrintWriter output;
     private ObjectInputStream input;
@@ -63,7 +63,7 @@ public class Client {
             System.out.println("Connection Established!");
 
             // Create chat P2P connection invitations listener
-            connectionListener = new ClientConnectionListener(inviteServerSocket);
+            connectionListener = new ClientConnectionListenerThread(inviteServerSocket);
             connectionListener.start();
 
         } catch (Exception ex) {
