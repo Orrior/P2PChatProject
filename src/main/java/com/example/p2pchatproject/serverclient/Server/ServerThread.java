@@ -1,4 +1,4 @@
-package com.example.p2pchatproject.serverclient.Arbiter;
+package com.example.p2pchatproject.serverclient.Server;
 
 
 import com.example.p2pchatproject.model.ServerData;

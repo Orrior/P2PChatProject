@@ -1,6 +1,7 @@
 package com.example.p2pchatproject;
 
 import com.example.p2pchatproject.serverclient.Client.Client;
+import com.example.p2pchatproject.serverclient.Client.ClientListenerI;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -22,7 +23,19 @@ public class HelloApplication extends Application {
         HelloController controller = fxmlLoader.getController();
         controller.setClient(client);
         // Add listener.
-        client.connectionListener.addPendingConnectionListener(controller::onHelloButtonClick);
+        client.connectionListener.addPendingConnectionListener(new ClientListenerI() {
+            @Override
+            public void onConnection() {
+                controller.onHelloButtonClick();
+            }
+
+            @Override
+            public void onMessage() {
+                // Update Connections Part
+                controller.onHelloButtonClick(); //TODO Should we make some sort of cached/optimised method here?
+                // Update Chat part
+            }
+        });
 
         stage.setTitle("P2PChat");
         stage.setScene(scene);

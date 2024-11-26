@@ -48,19 +48,20 @@ public class HelloController {
         GridPane grid = new GridPane();
 
         for(int i=0; i<connections.size(); i++){
-            Button button1 = new Button();
-            button1.setText("Connect");
             SocketAddress socketAddress = connections.get(i).socketAddress;
-            button1.setOnAction(x -> tryConnectButtonClick(socketAddress));
+            Button button1 = new Button();
 
-            Label label = new Label();
-            label.setText(connections.get(i).toString());
+            if(client.connectionListener.chatsContains(socketAddress)){
+                if(!client.connectionListener.getChat(socketAddress).getChatHistory().isEmpty()){
+                    // Chat is ongoing
+                    button1.setText("chat");
+                } else {
+                    // Chat is waiting to be accepted/rejected
+                    button1.setText("request pending...");
+                }
+            } else if (connections.get(i).pendingConnection) {
+                // Incoming chat request
 
-            //add connection button to GridPane
-            grid.add(button1, 0, i); //  (child, columnIndex, rowIndex)
-            grid.add(label , 3, i);
-
-            if(connections.get(i).pendingConnection){
                 Button button2 = new Button();
                 button2.setText("Accept");
                 button2.setOnAction(x -> acceptPendingConnection(socketAddress));
@@ -71,9 +72,21 @@ public class HelloController {
 
                 grid.add(button2, 1, i); // FIXME
                 grid.add(button3, 2, i); // FIXME
+            } else {
+                // Nothing ever happens, we can ask if user wants to chat with us.
+                button1.setText("Connect");
+                button1.setOnAction(x -> tryConnectButtonClick(socketAddress));
             }
 
+            Label label = new Label();
+            label.setText(connections.get(i).toString());
+
+            //add connection button to GridPane
+            grid.add(button1, 0, i); //  (child, columnIndex, rowIndex)
+            grid.add(label , 3, i);
+
             // margins are up to your preference
+            //TODO! Should we make these margins via css fxml?
             GridPane.setMargin(button1, new Insets(5));
             GridPane.setMargin(label, new Insets(5));
         }

@@ -10,18 +10,18 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-public class ClientConnectionListenerThread extends Thread {
+public class ClientConnectionThread extends Thread {
 
     ServerSocket listenerServerSocket;
     Hashtable<SocketAddress, ClientChatThread> chats;
     Hashtable<SocketAddress, Socket> pendingSockets;
-    List<PendingConnectionListener> pendingConnectionListeners;
+    List<ClientListenerI> clientListeners;
 
-    public ClientConnectionListenerThread(ServerSocket serverSocket) {
+    public ClientConnectionThread(ServerSocket serverSocket) {
         this.listenerServerSocket = serverSocket;
         this.pendingSockets = new Hashtable<>();
         this.chats = new Hashtable<>();
-        this.pendingConnectionListeners = new ArrayList<>();
+        this.clientListeners = new ArrayList<>();
     }
 
     public void close() throws IOException {
@@ -32,7 +32,7 @@ public class ClientConnectionListenerThread extends Thread {
     }
 
     public void run() {
-        System.out.println("The ConnectionListener is listening on port " + listenerServerSocket.getLocalPort());
+        System.out.println("The ConnectionThread is listening on port " + listenerServerSocket.getLocalPort());
         try {
             while (true) {
                 processInviteSocket();
@@ -57,23 +57,24 @@ public class ClientConnectionListenerThread extends Thread {
         }
 
         pendingSockets.put(address, socket);
-        updatePendingConnections();
+        updateUI();
     }
 
-    public void updatePendingConnections() {
+    public void updateUI() {
         // Notify GUI about connections update.
-        Platform.runLater(() -> pendingConnectionListeners.forEach(PendingConnectionListener::onConnection));
+        Platform.runLater(() -> clientListeners.forEach(ClientListenerI::onConnection));
     }
 
     public void acceptPendingConnection(SocketAddress address) {
         Socket socket = pendingSockets.get(address);
         try {
-            addChat(address, socket);
+            ClientChatThread chatThread = addChat(address, socket);
+            chatThread.sendMessage("Chat Request Accepted!"); //TODO this looks not good.
         } catch (Exception e) {
             System.out.println(e.getMessage());
         } finally {
             pendingSockets.remove(address);
-            updatePendingConnections();
+            updateUI();
             //DEBUG
             System.out.println("Chat Request Accepted");
         }
@@ -87,7 +88,7 @@ public class ClientConnectionListenerThread extends Thread {
             System.out.println(e.getMessage());
         } finally {
             pendingSockets.remove(address);
-            updatePendingConnections();
+            updateUI();
             //DEBUG
             System.out.println("Chat Request Rejected");
         }
@@ -114,18 +115,27 @@ public class ClientConnectionListenerThread extends Thread {
         }
     }
 
-    public void addPendingConnectionListener(PendingConnectionListener listener) {
-        pendingConnectionListeners.add(listener);
+    public void addPendingConnectionListener(ClientListenerI listener) {
+        clientListeners.add(listener);
     }
 
     public int getPendingConnections() {
         return pendingSockets.size();
     }
 
-    private void addChat(SocketAddress socketAddress, Socket socket) {
+    private ClientChatThread addChat(SocketAddress socketAddress, Socket socket) {
         // Create ClientChatThread and add it to the chats pool
-        ClientChatThread thread = new ClientChatThread(socketAddress, socket, chats);
+        ClientChatThread thread = new ClientChatThread(socketAddress, socket, chats, clientListeners);
         thread.start();
         chats.put(socketAddress, thread);
+        return thread;
+    }
+
+    public ClientChatThread getChat(SocketAddress socketAddress){
+        return chats.get(socketAddress);
+    }
+
+    public boolean chatsContains(SocketAddress socketAddress){
+        return chats.containsKey(socketAddress);
     }
 }
