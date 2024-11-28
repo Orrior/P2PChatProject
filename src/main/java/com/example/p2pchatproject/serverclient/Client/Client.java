@@ -15,7 +15,6 @@ public class Client {
     private ObjectInputStream input;
 
     private ServerSocket inviteServerSocket;
-    private Boolean eof;
     private final String username = "Client-1"; //TODO! Make this smh changeable.
 
 
@@ -29,7 +28,7 @@ public class Client {
         String result = null;
         Scanner scanner = new Scanner(System.in);
 
-        while (!eof) {
+        while (true) {
             System.out.println("ENTER TEXT: ");
             result = scanner.nextLine();
             output.println(result);
@@ -47,7 +46,7 @@ public class Client {
     }
 
     public void run() {
-        eof = false;
+
 
         String hostname = "localhost";
         int port = 6868;
@@ -115,19 +114,6 @@ public class Client {
             return clientData;
 
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void connectListener(SocketAddress socketAddress) {
-        // DEBUG DEPRECATED
-        try (Socket listenerSocket = new Socket()) {
-            listenerSocket.connect(socketAddress);
-            PrintWriter writer = new PrintWriter(listenerSocket.getOutputStream(), true);
-            writer.println("TEST123");
-            System.out.println("Connection Confirmed!");
-
-        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

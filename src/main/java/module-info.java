@@ -6,6 +6,7 @@ module com.example.p2pchatproject {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires java.desktop;
+    requires jdk.jshell;
 
     opens com.example.p2pchatproject to javafx.fxml;
     exports com.example.p2pchatproject;

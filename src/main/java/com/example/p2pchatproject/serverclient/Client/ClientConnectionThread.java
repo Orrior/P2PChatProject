@@ -109,9 +109,8 @@ public class ClientConnectionThread extends Thread {
             // Send listener socket address as identifier.
             //TODO CHECK IF SUCH IP ALREADY REGISTERED IN CHAT OR PENDING CONNECTIONS.
             addChat(socketAddress, socket);
-
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
     }
 
@@ -125,10 +124,14 @@ public class ClientConnectionThread extends Thread {
 
     private ClientChatThread addChat(SocketAddress socketAddress, Socket socket) {
         // Create ClientChatThread and add it to the chats pool
-        ClientChatThread thread = new ClientChatThread(socketAddress, socket, chats, clientListeners);
-        thread.start();
-        chats.put(socketAddress, thread);
-        return thread;
+        try {
+            ClientChatThread thread = new ClientChatThread(socketAddress, socket, chats, clientListeners);
+            thread.start();
+            chats.put(socketAddress, thread);
+            return thread;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public ClientChatThread getChat(SocketAddress socketAddress){

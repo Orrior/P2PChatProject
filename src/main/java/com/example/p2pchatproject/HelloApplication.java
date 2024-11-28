@@ -8,6 +8,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.SocketAddress;
+import java.util.Properties;
+import java.util.UUID;
 
 public class HelloApplication extends Application {
     private Client client;
@@ -30,10 +34,16 @@ public class HelloApplication extends Application {
             }
 
             @Override
-            public void onMessage() {
+            public void onMessage(SocketAddress socketAddress) {
                 // Update Connections Part
-                controller.onHelloButtonClick(); //TODO Should we make some sort of cached/optimised method here?
+                controller.onMessageRefresh(socketAddress);
                 // Update Chat part
+            }
+
+            @Override
+            public void onDisconnect(){
+                controller.onDisconnect();
+                controller.onHelloButtonClick();
             }
         });
 
