@@ -1,7 +1,7 @@
 package com.example.p2pchatproject.serverclient.Server;
 
 
-import com.example.p2pchatproject.model.ServerData;
+import com.example.p2pchatproject.model.ServerDataV2;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class ServerThread extends Thread{;
-    private Hashtable<SocketAddress, ServerData> addressPool;
+    private Hashtable<SocketAddress, ServerDataV2> addressPool;
     private Socket socket;
     private SocketAddress address;
 
-    public ServerThread(Socket socket, Hashtable<SocketAddress, ServerData> addressPool) {
+    public ServerThread(Socket socket, Hashtable<SocketAddress, ServerDataV2> addressPool) {
         this.address = socket.getRemoteSocketAddress();
         this.socket = socket;
         this.addressPool = addressPool;
@@ -31,23 +31,21 @@ public class ServerThread extends Thread{;
             OutputStream output = socket.getOutputStream();
             ObjectOutputStream objectOutput = new ObjectOutputStream(output);
 
-            ServerData data = (ServerData) inputObject.readObject();
+            ServerDataV2 data = (ServerDataV2) inputObject.readObject();
             addressPool.put(socket.getRemoteSocketAddress(), data);
 
-            for (ServerData dataSocket : addressPool.values()) {
-                System.out.println("DATA: " + dataSocket.socketAddress + " " + dataSocket.data);
+            for (ServerDataV2 dataSocket : addressPool.values()) {
+                System.out.println(dataSocket.socketAddress() +"|"+ dataSocket.id() +"|" + dataSocket.name());
             }
 
-            text = "HELLO, CHAT!"; // TODO UWU
+
             objectOutput.writeObject(new ArrayList<>(addressPool.values()));
 
-            while(!text.equals("fin")) {
-                text = reader.readLine();
+            while(true) {
+                reader.readLine();
                 objectOutput.reset();
                 objectOutput.writeObject(new ArrayList<>(addressPool.values()));
             }
-
-            socket.close();
         } catch (IOException ex) {
             System.out.println("Server exception: " + ex.getMessage());
 //            ex.printStackTrace();

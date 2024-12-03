@@ -1,6 +1,6 @@
 package com.example.p2pchatproject.serverclient.Server;
 
-import com.example.p2pchatproject.model.ServerData;
+import com.example.p2pchatproject.model.ServerDataV2;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -13,7 +13,7 @@ public class Server {
         int port = 6868;
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("The server is listening on port " + port);
-            Hashtable<SocketAddress, ServerData> addressPool = new Hashtable<>();
+            Hashtable<SocketAddress, ServerDataV2> addressPool = new Hashtable<>();
 
             while (true) {
                 Socket socket = serverSocket.accept();

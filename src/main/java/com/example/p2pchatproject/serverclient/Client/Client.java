@@ -1,8 +1,8 @@
 package com.example.p2pchatproject.serverclient.Client;
 
 
-import com.example.p2pchatproject.model.ClientData;
-import com.example.p2pchatproject.model.ServerData;
+import com.example.p2pchatproject.model.ServerDataV2;
+import com.example.p2pchatproject.util.Util;
 
 import java.io.*;
 import java.net.*;
@@ -15,54 +15,28 @@ public class Client {
     private ObjectInputStream input;
 
     private ServerSocket inviteServerSocket;
-    private final String username = "Client-1"; //TODO! Make this smh changeable.
+    private final String username; //TODO! Make this smh changeable.
+    private final String uuid;
 
-
-    public static void main(String[] args) {
-        Client client = new Client();
-        client.run();
-        client.chat();
+    public Client(){
+        String[] userdata = Util.getUserData();
+        username = userdata[0];
+        uuid = userdata[1];
     }
-
-    public void chat() {
-        String result = null;
-        Scanner scanner = new Scanner(System.in);
-
-        while (true) {
-            System.out.println("ENTER TEXT: ");
-            result = scanner.nextLine();
-            output.println(result);
-
-            List<ServerData> dataPool = null;
-            try {
-                dataPool = (List<ServerData>) input.readObject();
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-            for (ServerData dataSocket : dataPool) {
-                System.out.println("DATA: " + dataSocket.socketAddress + " " + dataSocket.data);
-            }
-        }
-    }
-
+    
     public void run() {
-
-
-        String hostname = "localhost";
-        int port = 6868;
-
         try {
             // Create socket listening to chat P2P connection invitations
-            inviteServerSocket = new ServerSocket(0); // port 0 will try to listen and take any free port.
+            inviteServerSocket = new ServerSocket(0); // port 0 will try to take any free port.
             SocketAddress inviteAddress = inviteServerSocket.getLocalSocketAddress(); // TODO! Maybe we should bind ServerSocket ip to localhost later.
-            System.out.println("INVITE SERVER LISTENING ON PORT " + inviteAddress.toString());
+            System.out.println("Chat server listening on address : " + inviteAddress.toString());
 
             // Start Connection with Arbiter Server, initialise fields.
-            initArbiterSocket(hostname, port, inviteAddress);
-            System.out.println("Connection Established!");
+            initHubConnection(inviteAddress);
+            System.out.println("Connection with hub Server Established!");
 
             // Create chat P2P connection invitations listener
-            connectionListener = new ClientConnectionThread(inviteServerSocket);
+            connectionListener = new ClientConnectionThread(inviteServerSocket, username, uuid);
             connectionListener.start();
 
         } catch (Exception ex) {
@@ -70,47 +44,48 @@ public class Client {
         }
     }
 
-    private void initArbiterSocket(String hostname, int port, SocketAddress inviteAddress) throws IOException, ClassNotFoundException {
-        Socket arbiterSocket = new Socket(hostname, port);
+    private void initHubConnection(SocketAddress inviteAddress) throws IOException, ClassNotFoundException {
+        Socket serverSocket = new Socket(
+                Util.getProperty("hostname"),
+                Integer.parseInt(Objects.requireNonNull(Util.getProperty("port"))));
 
-        //OUT-COMING MESSAGE
-        OutputStream output = arbiterSocket.getOutputStream();
+        //OUTGOING MESSAGE
+        OutputStream output = serverSocket.getOutputStream();
         ObjectOutputStream outputObject = new ObjectOutputStream(output);
         PrintWriter writer = new PrintWriter(output, true);
 
-        //IN-COMING MESSAGE
-        InputStream input = arbiterSocket.getInputStream();
+        //INGOING MESSAGE
+        InputStream input = serverSocket.getInputStream();
         ObjectInputStream inputObject = new ObjectInputStream(input);
 
         this.output = writer;
         this.input = inputObject;
 
-        //First connection data;
-        outputObject.writeObject(new ServerData(inviteAddress, username));
-        for (ServerData dataSocket : (List<ServerData>) this.input.readObject()) {
+        //Send our data to server list
+        outputObject.writeObject(new ServerDataV2(inviteAddress, uuid, username));
+
+        //Read first response
+        System.out.println("Initial connection addresses: ");
+        for (ServerDataV2 dataSocket : (List<ServerDataV2>) this.input.readObject()) {
             System.out.println(dataSocket); // TODO this is actually not very good.
         }
     }
 
-    private List<ClientData> getClientData() throws IOException, ClassNotFoundException {
-        List<ServerData> serverData;
-        List<ClientData> clientData = new ArrayList<>();
+    private List<ServerDataV2> getClientData() throws IOException, ClassNotFoundException {
+        List<ServerDataV2> serverData;
 
-        serverData = (List<ServerData>) input.readObject();
+        serverData = (List<ServerDataV2>) input.readObject();
 
-
-        serverData.forEach(x -> clientData.add(new ClientData(x,
-                connectionListener.pendingSockets.containsKey(x.socketAddress))));
-        return clientData;
+        return serverData;
     }
 
-    public List<ClientData> ping() {
-        List<ClientData> clientData;
+    public List<ServerDataV2> ping() {
+        List<ServerDataV2> clientData;
         output.println(username);  // Send something to server to get users list.
 
         try {
             clientData = getClientData();
-            clientData.removeIf(x -> x.socketAddress.equals(inviteServerSocket.getLocalSocketAddress())); //TODO! Ideally ping data should be in hashmap.
+            clientData.removeIf(x -> x.socketAddress().equals(inviteServerSocket.getLocalSocketAddress())); //TODO! Ideally ping data should be in hashmap.
             return clientData;
 
         } catch (IOException | ClassNotFoundException e) {

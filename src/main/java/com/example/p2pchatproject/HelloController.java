@@ -1,7 +1,8 @@
 package com.example.p2pchatproject;
 
-import com.example.p2pchatproject.model.ClientData;
+import com.example.p2pchatproject.model.ServerDataV2;
 import com.example.p2pchatproject.serverclient.Client.Client;
+import com.example.p2pchatproject.serverclient.Client.ClientChatThread;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
@@ -34,7 +35,7 @@ public class HelloController {
             sendMessageButton.setDisable(false);
         }
 
-        List<ClientData> connections = client.ping();
+        List<ServerDataV2> connections = client.ping();
 
         usersList.setContent(createConnectionGrid(connections));
     }
@@ -91,56 +92,56 @@ public class HelloController {
         return String.join("\n", chatHistory);
     }
 
-    private GridPane createConnectionGrid(List<ClientData> connections) {
+    private GridPane createConnectionGrid(List<ServerDataV2> connections) {
         GridPane grid = new GridPane();
         GridPane.setMargin(grid, new Insets(5));
 
-        for(int i=0; i<connections.size(); i++){
-            SocketAddress socketAddress = connections.get(i).socketAddress;
-            if (connections.get(i).pendingConnection) {
-                // Incoming chat request
+        for(int i=0; i<connections.size(); i++) {
+            Button button1 = new Button();
+            Button button2 = new Button();
+            Button button3 = new Button();
 
-                Button button2 = new Button();
-                button2.setText("Accept");
-                button2.setOnAction(x -> acceptPendingConnection(socketAddress));
+            SocketAddress socketAddress = connections.get(i).socketAddress();
 
-                Button button3 = new Button();
-                button3.setText("Reject");
-                button3.setOnAction(x -> rejectPendingConnection(socketAddress));
-
-                grid.add(button2, 1, i); // FIXME
-                grid.add(button3, 2, i); // FIXME
-            } else {
-                Button button1 = new Button();
-
-                if(client.connectionListener.chatsContains(socketAddress)){
-                    if(!client.connectionListener.getChat(socketAddress).getChatHistory().isEmpty()){
-                        // Chat is ongoing
-                        button1.setText("chat");
-                        button1.setOnAction(x -> setChat(socketAddress));
-                        //TODO CHAT
-                    } else {
-                        // Chat is waiting to be accepted/rejected
-                        button1.setDisable(true);
-                        button1.setText("request pending...");
-                    }
-                } else {
-                    // Nothing ever happens, we can ask if user wants to chat with us.
-                    button1.setText("Connect");
-                    button1.setOnAction(x -> tryConnectButtonClick(socketAddress));
-                }
+            if(!client.connectionListener.chatsContains(socketAddress)) {
+                // Nothing ever happens, we can ask if user wants to chat with us.
+                button1.setText("Connect");
+                button1.setOnAction(x -> tryConnectButtonClick(socketAddress));
                 grid.add(button1, 0, i); //  (child, columnIndex, rowIndex)
-            }
+            } else {
+                ClientChatThread chatThread = client.connectionListener.getChat(socketAddress);
 
+                if (chatThread.isPending && chatThread.getChatHistory().isEmpty()){
+                    // We are requested to accept/reject chat.
+                    button2.setText("Accept");
+                    button2.setOnAction(x -> acceptPendingConnection(socketAddress));
+
+                    button3.setText("Reject");
+                    button3.setOnAction(x -> rejectPendingConnection(socketAddress));
+
+                    grid.add(button2, 1, i); // FIXME
+                    grid.add(button3, 2, i); // FIXME
+
+                } else if (!chatThread.isPending && !chatThread.getChatHistory().isEmpty()) {
+                    // Chat is ongoing
+                    button1.setText("chat");
+                    button1.setOnAction(x -> setChat(socketAddress));
+
+                    grid.add(button1, 0, i);
+                } else if (!chatThread.isPending && chatThread.getChatHistory().isEmpty()) {
+                    // Chat is waiting to be accepted/rejected by other side.
+                    button1.setDisable(true);
+                    button1.setText("request pending...");
+
+                    grid.add(button1, 0, i);
+                } else {
+                    throw new RuntimeException("Unexpected conditions in HelloController");
+                }
+            }
 
             Label label = new Label();
             label.setText(connections.get(i).toString());
-
-            //add connection button to GridPane
-
             grid.add(label , 3, i);
-
-            // margins are up to your preference
         }
 
         return grid;

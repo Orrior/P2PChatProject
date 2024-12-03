@@ -11,17 +11,20 @@ import java.util.List;
 
 public class ClientChatThread extends Thread{
     private final SocketAddress socketAddress;
-    private Socket socket;
-    private Hashtable<SocketAddress, ClientChatThread> chats;
+    private final Socket socket;
+    private final Hashtable<SocketAddress, ClientChatThread> chats;
+
+    private final PrintWriter output;
+    private final BufferedReader input;
+
+    public boolean isPending;
     List<ClientListenerI> clientListeners;
-
-    private PrintWriter output;
-    private BufferedReader input;
-
     List<String> chatHistory;
 
-    public ClientChatThread(SocketAddress socketAddress, Socket socket, Hashtable<SocketAddress,
-            ClientChatThread> chats, List<ClientListenerI> clientListeners) throws IOException {
+    public ClientChatThread(SocketAddress socketAddress, Socket socket, Hashtable<SocketAddress, ClientChatThread> chats,
+                            List<ClientListenerI> clientListeners) throws IOException {
+        isPending = true;
+
         this.socketAddress = socketAddress;
         this.socket = socket;
         this.chats = chats;

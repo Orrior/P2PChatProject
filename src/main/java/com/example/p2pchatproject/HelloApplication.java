@@ -2,22 +2,30 @@ package com.example.p2pchatproject;
 
 import com.example.p2pchatproject.serverclient.Client.Client;
 import com.example.p2pchatproject.serverclient.Client.ClientListenerI;
+import com.example.p2pchatproject.util.Util;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.SocketAddress;
-import java.util.Properties;
-import java.util.UUID;
 
 public class HelloApplication extends Application {
     private Client client;
 
     @Override
     public void start(Stage stage) throws IOException {
+
+        //Get resource properties
+        String hostname = Util.getProperty("hostname");
+        String port = Util.getProperty("port");
+
+        if(port == null || hostname == null){
+            throw new FileNotFoundException("Port or hostname in client.properties is missing!");
+        }
+
         this.client = new Client();
         client.run();
 
