@@ -9,16 +9,23 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class HelloController {
 
     private Client client;
 
     private SocketAddress chatSocketAddress;
+
+    private final Set<SocketAddress> favourites = new HashSet<>();
 
     @FXML
     private ScrollPane usersList;
@@ -34,7 +41,7 @@ public class HelloController {
 
     @FXML
     public void onHelloButtonClick() {
-        if(sendMessageButton.isDisable() && chatSocketAddress != null){
+        if (sendMessageButton.isDisable() && chatSocketAddress != null) {
             sendMessageButton.setDisable(false);
         }
 
@@ -44,14 +51,14 @@ public class HelloController {
     }
 
     @FXML
-    protected void tryConnectButtonClick(SocketAddress socketAddress){
+    protected void tryConnectButtonClick(SocketAddress socketAddress) {
         client.connectionListener.requestChatConnect(socketAddress);
         onHelloButtonClick();
     }
 
     @FXML
-    protected void sendMessageOnClick(){
-        if(chatSocketAddress == null){
+    protected void sendMessageOnClick() {
+        if (chatSocketAddress == null) {
             return;
         }
 
@@ -61,36 +68,45 @@ public class HelloController {
     }
 
     @FXML
-    public void onMessageRefresh(SocketAddress socketAddress){
-        if(socketAddress.equals(this.chatSocketAddress)){
+    public void onMessageRefresh(SocketAddress socketAddress) {
+        if (socketAddress.equals(this.chatSocketAddress)) {
             refreshChat();
         }
         onHelloButtonClick();
     }
 
     @FXML
-    protected void setChat(SocketAddress socketAddress){
+    protected void setChat(SocketAddress socketAddress) {
         this.chatSocketAddress = socketAddress;
         refreshChat();
         onHelloButtonClick();
     }
 
-    protected void acceptPendingConnection(SocketAddress address){
+    protected void acceptPendingConnection(SocketAddress address) {
         client.connectionListener.acceptPendingConnection(address);
         setChat(address);
         onHelloButtonClick();
     }
 
-    protected void rejectPendingConnection(SocketAddress address){
+    protected void rejectPendingConnection(SocketAddress address) {
         client.connectionListener.rejectPendingConnection(address);
         onHelloButtonClick();
     }
 
-    private void refreshChat(){
+    private void refreshChat() {
         userChat.setText(createChatTextBox());
     }
 
-    private String createChatTextBox(){
+    private void favourite(SocketAddress socketAddress) {
+        if (favourites.contains(socketAddress)) {
+            favourites.remove(socketAddress);
+        } else {
+            favourites.add(socketAddress);
+        }
+        onHelloButtonClick();
+    }
+
+    private String createChatTextBox() {
         List<MessageData> chatHistory = client.connectionListener.getChat(chatSocketAddress).getChatHistory();
         StringBuffer chat = new StringBuffer();
         chatHistory.forEach(x-> chat.append(x.message()).append("\n"));
@@ -100,6 +116,8 @@ public class HelloController {
     private VBox createVbox (List<ServerDataV2> connections) {
         VBox vbox = new VBox();
         VBox.setMargin(vbox, new Insets(5));
+
+        connections.sort(Comparator.comparing(x -> !favourites.contains(x.socketAddress())));
         for (ServerDataV2 connection : connections) {
             vbox.getChildren().add(createRow(connection));
         }
@@ -114,12 +132,12 @@ public class HelloController {
         SocketAddress socketAddress = connection.socketAddress();
 
         //Buttons application logic
-        if(!client.connectionListener.chatsContains(socketAddress)) {
+        if (!client.connectionListener.chatsContains(socketAddress)) {
             // Nothing ever happens, we can ask if user wants to chat with us.
             hbox.getChildren().add(requestConnectButton(socketAddress));
         } else {
             ClientChatThread chatThread = client.connectionListener.getChat(socketAddress);
-            if (chatThread.isPending && chatThread.getChatHistory().isEmpty()){
+            if (chatThread.isPending && chatThread.getChatHistory().isEmpty()) {
                 // We are requested to accept/reject chat.
                 hbox.getChildren().add(acceptConnectionButton(socketAddress));
                 hbox.getChildren().add(rejectConnectionButton(socketAddress));
@@ -142,11 +160,28 @@ public class HelloController {
         detailsButton.setText("details");
         hbox.getChildren().add(detailsButton);
 
-        Button favouriteButton = new Button();
-        favouriteButton.setText("favourite"); //Todo replace to the funny star svg
-        hbox.getChildren().add(favouriteButton);
+        hbox.getChildren().add(favouriteButton(socketAddress));
 
         return hbox;
+    }
+
+    private Button favouriteButton (SocketAddress socketAddress) {
+        Button favouriteButton = new Button();
+
+
+        Region icon = new Region();
+        icon.getStyleClass().add("favourite-icon");
+
+        if (favourites.contains(socketAddress)) {
+            favouriteButton.getStyleClass().add("unfavourite-button");
+        } else {
+            favouriteButton.getStyleClass().add("favourite-button");
+        }
+
+        favouriteButton.setOnAction(x -> favourite(socketAddress));
+        favouriteButton.setGraphic(icon);
+
+        return favouriteButton;
     }
 
     private Button chatButton(SocketAddress socketAddress) {
@@ -202,7 +237,7 @@ public class HelloController {
         sendMessageButton.setDisable(true);
     }
 
-    public void setClient(Client client){
+    public void setClient(Client client) {
         this.client = client;
     }
 }
