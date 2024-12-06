@@ -57,7 +57,7 @@ public class ClientConnectionThread extends Thread {
         ObjectInputStream inputObject = new ObjectInputStream(socket.getInputStream());
 
         ServerDataV2 data = (ServerDataV2) inputObject.readObject();
-        if(chats2.containsKey(data.socketAddress())){
+        if(chats2.containsKey(data.socketAddress())) {
             socket.close();
             return;
         }
@@ -100,7 +100,7 @@ public class ClientConnectionThread extends Thread {
 
     public void requestChatConnect(SocketAddress address) {
         //Check that we don't have pending/approved connections with this user. If it does, abort the connection.
-        if(chats2.containsKey(address)){
+        if(chats2.containsKey(address)) {
             return;
         }
         try {
@@ -112,6 +112,7 @@ public class ClientConnectionThread extends Thread {
             objectOutput.writeObject(new ServerDataV2(listenerServerSocket.getLocalSocketAddress(), uuid, username));
 
             ClientDataV2 clientData = new ClientDataV2(uuid, username, socket);
+
             ClientChatThread chatThread = addChat(address, clientData);
             chatThread.isPending = false;
         } catch (IOException e) {
@@ -126,7 +127,7 @@ public class ClientConnectionThread extends Thread {
     private ClientChatThread addChat(SocketAddress address, ClientDataV2 data) {
         // Create ClientChatThread and add it to the chats pool
         try {
-            ClientChatThread thread = new ClientChatThread(address, data.socket(), chats2, clientListeners);
+            ClientChatThread thread = new ClientChatThread(data, address, chats2, clientListeners);
             thread.start();
             chats2.put(address, thread);
             return thread;
@@ -139,14 +140,15 @@ public class ClientConnectionThread extends Thread {
         return chats2.get(socketAddress);
     }
 
-    public boolean chatIsPending(SocketAddress socketAddress) {
-        if(chats2.containsKey(socketAddress)){
-            return chats2.get(socketAddress).isPending;
-        }
-        return false;
-    }
-
     public boolean chatsContains(SocketAddress socketAddress) {
         return chats2.containsKey(socketAddress);
+    }
+
+    public void closeChat(SocketAddress socketAddress) {
+        try {
+            chats2.get(socketAddress).close();
+        } catch (IOException e) {
+            //ignore
+        }
     }
 }

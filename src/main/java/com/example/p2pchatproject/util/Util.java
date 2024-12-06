@@ -20,7 +20,6 @@ public class Util {
         }
     }
 
-
     public static String[] getUserData(){
         String[] userData = new String[2]; // Userdata -> [String username, String uuid]
         try {

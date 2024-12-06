@@ -2,6 +2,7 @@ package com.example.p2pchatproject;
 
 import com.example.p2pchatproject.serverclient.Client.Client;
 import com.example.p2pchatproject.serverclient.Client.ClientListenerI;
+import com.example.p2pchatproject.ui.HelloController;
 import com.example.p2pchatproject.util.Util;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
