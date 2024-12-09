@@ -1,4 +1,4 @@
-package com.example.p2pchatproject.model;
+package com.example.p2pchat.model;
 
 import java.io.Serializable;
 import java.net.Socket;

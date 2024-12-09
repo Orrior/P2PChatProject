@@ -1,4 +1,4 @@
-module com.example.p2pchatproject {
+module com.example.p2pchat {
     requires javafx.controls;
     requires javafx.fxml;
 
@@ -8,12 +8,12 @@ module com.example.p2pchatproject {
     requires java.desktop;
     requires jdk.jshell;
 
-    opens com.example.p2pchatproject to javafx.fxml;
-    exports com.example.p2pchatproject;
-    exports com.example.p2pchatproject.ui;
-    exports com.example.p2pchatproject.util;
-    exports com.example.p2pchatproject.model;
-    exports com.example.p2pchatproject.serverclient.Client;
-    exports com.example.p2pchatproject.serverclient.Server;
-    opens com.example.p2pchatproject.ui to javafx.fxml;
+    opens com.example.p2pchat to javafx.fxml;
+    exports com.example.p2pchat;
+    exports com.example.p2pchat.ui;
+    exports com.example.p2pchat.util;
+    exports com.example.p2pchat.model;
+    exports com.example.p2pchat.serverclient.Client;
+    exports com.example.p2pchat.serverclient.Server;
+    opens com.example.p2pchat.ui to javafx.fxml;
 }

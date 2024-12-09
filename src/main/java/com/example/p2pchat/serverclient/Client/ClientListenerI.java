@@ -1,4 +1,4 @@
-package com.example.p2pchatproject.serverclient.Client;
+package com.example.p2pchat.serverclient.Client;
 
 import java.net.SocketAddress;
 

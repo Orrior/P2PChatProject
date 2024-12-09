@@ -1,6 +1,6 @@
-package com.example.p2pchatproject.serverclient.Server;
+package com.example.p2pchat.serverclient.Server;
 
-import com.example.p2pchatproject.model.ServerData;
+import com.example.p2pchat.model.ServerData;
 
 import java.io.IOException;
 import java.net.ServerSocket;

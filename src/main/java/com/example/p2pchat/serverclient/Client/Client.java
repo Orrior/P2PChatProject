@@ -1,8 +1,8 @@
-package com.example.p2pchatproject.serverclient.Client;
+package com.example.p2pchat.serverclient.Client;
 
 
-import com.example.p2pchatproject.model.ServerData;
-import com.example.p2pchatproject.util.Util;
+import com.example.p2pchat.model.ServerData;
+import com.example.p2pchat.util.Util;
 
 import java.io.*;
 import java.net.*;

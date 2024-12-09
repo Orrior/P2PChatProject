@@ -1,9 +1,9 @@
-package com.example.p2pchatproject;
+package com.example.p2pchat;
 
-import com.example.p2pchatproject.serverclient.Client.Client;
-import com.example.p2pchatproject.serverclient.Client.ClientListenerI;
-import com.example.p2pchatproject.ui.HelloController;
-import com.example.p2pchatproject.util.Util;
+import com.example.p2pchat.serverclient.Client.Client;
+import com.example.p2pchat.serverclient.Client.ClientListenerI;
+import com.example.p2pchat.ui.HelloController;
+import com.example.p2pchat.util.Util;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;

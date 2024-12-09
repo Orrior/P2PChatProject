@@ -1,6 +1,6 @@
-package com.example.p2pchatproject.util;
+package com.example.p2pchat.util;
 
-import com.example.p2pchatproject.HelloApplication;
+import com.example.p2pchat.HelloApplication;
 
 import java.io.*;
 import java.util.Properties;

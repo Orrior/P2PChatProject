@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 
-<HBox alignment="TOP_LEFT" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.p2pchatproject.ui.HelloController">
+<HBox alignment="TOP_LEFT" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" spacing="20.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.p2pchat.ui.HelloController">
 <!--  <VBox minWidth="200" prefWidth="230" styleClass="onlineTab">-->
 <!--  <VBox minWidth="500" prefWidth="530" styleClass="onlineTab">-->
   <VBox minWidth="200" prefHeight="400.0" prefWidth="400.0" styleClass="onlineTab">

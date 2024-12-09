@@ -1,9 +1,9 @@
-package com.example.p2pchatproject.ui;
+package com.example.p2pchat.ui;
 
-import com.example.p2pchatproject.model.MessageData;
-import com.example.p2pchatproject.model.ServerData;
-import com.example.p2pchatproject.serverclient.Client.Client;
-import com.example.p2pchatproject.serverclient.Client.ClientChatThread;
+import com.example.p2pchat.model.MessageData;
+import com.example.p2pchat.model.ServerData;
+import com.example.p2pchat.serverclient.Client.Client;
+import com.example.p2pchat.serverclient.Client.ClientChatThread;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
