@@ -21,7 +21,7 @@
 
 
     <VBox VBox.vgrow="ALWAYS">
-        <ScrollPane fx:id="usersList" VBox.vgrow="ALWAYS">
+        <ScrollPane fx:id="usersList" VBox.vgrow="ALWAYS" fitToWidth="true">
             <VBox.margin>
                 <Insets top="10.0" />
             </VBox.margin>

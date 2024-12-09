@@ -52,11 +52,27 @@ VBox{}
 
  .favourite-icon {
     -fx-background-color: -icon-paint;
-    -size: 24;
+    -size: 18;
     -fx-min-height: -size;
     -fx-min-width: -size;
     -fx-max-height: -size;
     -fx-max-width: -size;
-
     -fx-shape: "M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z";
+}
+
+.row {
+    -fx-padding: 5;
+    -fx-background-color: lightgray;
+    -fx-border-color: darkgray;
+    -fx-border-insets: 0;
+    -fx-border-width: 1;
+}
+
+.row-button {
+    -fx-padding: 5;
+    -fx-border-color: darkgray;
+    -fx-border-insets: 0;
+    -fx-border-width: 1;
+        -fx-border-radius: 10;
+        -fx-background-radius: 10;
 }

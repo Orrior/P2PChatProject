@@ -1,6 +1,6 @@
 package com.example.p2pchatproject.serverclient.Client;
 
-import com.example.p2pchatproject.model.ClientDataV2;
+import com.example.p2pchatproject.model.ClientData;
 import com.example.p2pchatproject.model.MessageData;
 import javafx.application.Platform;
 
@@ -27,7 +27,7 @@ public class ClientChatThread extends Thread{
     List<ClientListenerI> clientListeners;
     List<MessageData> chatHistory2;
 
-    public ClientChatThread(ClientDataV2 clientData, SocketAddress socketAddress,
+    public ClientChatThread(ClientData clientData, SocketAddress socketAddress,
                             Hashtable<SocketAddress, ClientChatThread> chats,
                             List<ClientListenerI> clientListeners) throws IOException {
         isPending = true;
@@ -62,7 +62,7 @@ public class ClientChatThread extends Thread{
 
     public void sendMessage(String text) {
         try {
-            MessageData message = new MessageData(username, uuid, text, LocalDateTime.now());
+            MessageData message = new MessageData(uuid, username, text, LocalDateTime.now());
             output2.writeObject(message);
             chatHistory2.add(message);
         } catch (IOException e) {

@@ -24,21 +24,21 @@ public class Util {
         String[] userData = new String[2]; // Userdata -> [String username, String uuid]
         try {
             userData = readUserData();
-        } catch (NullPointerException e){
+        } catch (NullPointerException | FileNotFoundException e){
             System.out.println(e.getMessage());
             userData[0] = "Client-1";
             userData[1] = UUID.randomUUID().toString();
             writeUserData(userData);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         } finally {
-            // log userdata
-            //TODO replace this with proper logging later.
             System.out.println("Username: " + userData[0]);
             System.out.println("UUID: " + userData[1]);
         }
         return userData;
     }
 
-    public static String[] readUserData(){
+    public static String[] readUserData() throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(Util.filename))) {
             String[] userdata = new String[2]; // Userdata -> [String username, String uuid]
             String username;
@@ -54,8 +54,6 @@ public class Util {
                 throw new NullPointerException("UUID not found");
             }
             return userdata;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 

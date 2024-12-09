@@ -1,7 +1,7 @@
 package com.example.p2pchatproject.serverclient.Server;
 
 
-import com.example.p2pchatproject.model.ServerDataV2;
+import com.example.p2pchatproject.model.ServerData;
 
 import java.io.*;
 import java.net.Socket;
@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 public class ServerThread extends Thread{;
-    private Hashtable<SocketAddress, ServerDataV2> addressPool;
+    private Hashtable<SocketAddress, ServerData> addressPool;
     private Socket socket;
     private SocketAddress address;
 
-    public ServerThread(Socket socket, Hashtable<SocketAddress, ServerDataV2> addressPool) {
+    public ServerThread(Socket socket, Hashtable<SocketAddress, ServerData> addressPool) {
         this.address = socket.getRemoteSocketAddress();
         this.socket = socket;
         this.addressPool = addressPool;
@@ -31,13 +31,12 @@ public class ServerThread extends Thread{;
             OutputStream output = socket.getOutputStream();
             ObjectOutputStream objectOutput = new ObjectOutputStream(output);
 
-            ServerDataV2 data = (ServerDataV2) inputObject.readObject();
+            ServerData data = (ServerData) inputObject.readObject();
             addressPool.put(socket.getRemoteSocketAddress(), data);
 
-            for (ServerDataV2 dataSocket : addressPool.values()) {
+            for (ServerData dataSocket : addressPool.values()) {
                 System.out.println(dataSocket.socketAddress() +"|"+ dataSocket.id() +"|" + dataSocket.name());
             }
-
 
             objectOutput.writeObject(new ArrayList<>(addressPool.values()));
 

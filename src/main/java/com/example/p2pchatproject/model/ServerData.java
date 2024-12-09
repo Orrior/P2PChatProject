@@ -3,7 +3,7 @@ package com.example.p2pchatproject.model;
 import java.io.Serializable;
 import java.net.SocketAddress;
 
-public record ServerDataV2(SocketAddress socketAddress, String id, String name) implements Serializable {
+public record ServerData(String id, String name, SocketAddress socketAddress) implements Serializable {
 
     @Override
     public String toString() {

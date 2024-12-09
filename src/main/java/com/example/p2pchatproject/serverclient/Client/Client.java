@@ -1,7 +1,7 @@
 package com.example.p2pchatproject.serverclient.Client;
 
 
-import com.example.p2pchatproject.model.ServerDataV2;
+import com.example.p2pchatproject.model.ServerData;
 import com.example.p2pchatproject.util.Util;
 
 import java.io.*;
@@ -15,7 +15,7 @@ public class Client {
     private ObjectInputStream input;
 
     private ServerSocket inviteServerSocket;
-    private final String username; //TODO! Make this smh changeable.
+    private final String username;
     private final String uuid;
 
     public Client(){
@@ -62,30 +62,30 @@ public class Client {
         this.input = inputObject;
 
         //Send our data to server list
-        outputObject.writeObject(new ServerDataV2(inviteAddress, uuid, username));
+        outputObject.writeObject(new ServerData(uuid, username, inviteAddress));
 
         //Read first response
         System.out.println("Initial connection addresses: ");
-        for (ServerDataV2 dataSocket : (List<ServerDataV2>) this.input.readObject()) {
+        for (ServerData dataSocket : (List<ServerData>) this.input.readObject()) {
             System.out.println(dataSocket); // TODO this is actually not very good.
         }
     }
 
-    private List<ServerDataV2> getClientData() throws IOException, ClassNotFoundException {
-        List<ServerDataV2> serverData;
+    private List<ServerData> getClientData() throws IOException, ClassNotFoundException {
+        List<ServerData> serverData;
 
-        serverData = (List<ServerDataV2>) input.readObject();
+        serverData = (List<ServerData>) input.readObject();
 
         return serverData;
     }
 
-    public List<ServerDataV2> ping() {
-        List<ServerDataV2> clientData;
+    public List<ServerData> ping() {
+        List<ServerData> clientData;
         output.println(username);  // Send something to server to get users list.
 
         try {
             clientData = getClientData();
-            clientData.removeIf(x -> x.socketAddress().equals(inviteServerSocket.getLocalSocketAddress())); //TODO! Ideally ping data should be in hashmap.
+            clientData.removeIf(x -> x.socketAddress().equals(inviteServerSocket.getLocalSocketAddress()));
             return clientData;
 
         } catch (IOException | ClassNotFoundException e) {

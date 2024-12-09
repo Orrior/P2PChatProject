@@ -1,7 +1,7 @@
 package com.example.p2pchatproject.serverclient.Client;
 
-import com.example.p2pchatproject.model.ClientDataV2;
-import com.example.p2pchatproject.model.ServerDataV2;
+import com.example.p2pchatproject.model.ClientData;
+import com.example.p2pchatproject.model.ServerData;
 import javafx.application.Platform;
 
 import java.io.*;
@@ -56,12 +56,12 @@ public class ClientConnectionThread extends Thread {
 
         ObjectInputStream inputObject = new ObjectInputStream(socket.getInputStream());
 
-        ServerDataV2 data = (ServerDataV2) inputObject.readObject();
+        ServerData data = (ServerData) inputObject.readObject();
         if(chats2.containsKey(data.socketAddress())) {
             socket.close();
             return;
         }
-        addChat(data.socketAddress(), new ClientDataV2(data.id(), data.name(), socket));
+        addChat(data.socketAddress(), new ClientData(data.id(), data.name(), socket));
         updateUI();
     }
 
@@ -109,9 +109,9 @@ public class ClientConnectionThread extends Thread {
 
             ObjectOutputStream objectOutput = new ObjectOutputStream(socket.getOutputStream());
 
-            objectOutput.writeObject(new ServerDataV2(listenerServerSocket.getLocalSocketAddress(), uuid, username));
+            objectOutput.writeObject(new ServerData(uuid, username, listenerServerSocket.getLocalSocketAddress()));
 
-            ClientDataV2 clientData = new ClientDataV2(uuid, username, socket);
+            ClientData clientData = new ClientData(uuid, username, socket);
 
             ClientChatThread chatThread = addChat(address, clientData);
             chatThread.isPending = false;
@@ -124,7 +124,7 @@ public class ClientConnectionThread extends Thread {
         clientListeners.add(listener);
     }
 
-    private ClientChatThread addChat(SocketAddress address, ClientDataV2 data) {
+    private ClientChatThread addChat(SocketAddress address, ClientData data) {
         // Create ClientChatThread and add it to the chats pool
         try {
             ClientChatThread thread = new ClientChatThread(data, address, chats2, clientListeners);
